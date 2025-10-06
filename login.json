@@ -1,0 +1,84 @@
+{
+  "title": "Login Page",
+  "uid": "login_page",
+  "schema": [
+    {
+      "display_name": "Page Title",
+      "uid": "page_title",
+      "data_type": "text"
+    },
+    {
+      "display_name": "Help Text",
+      "uid": "help_text",
+      "data_type": "text",
+      "field_metadata": {
+        "multiline": true
+      }
+    },
+    {
+      "display_name": "Regions",
+      "uid": "regions",
+      "data_type": "blocks",
+      "multiple": true,
+      "blocks": [
+        {
+          "title": "Region Option",
+          "uid": "region_option",
+          "schema": [
+            {
+              "display_name": "Region Name",
+              "uid": "region_name",
+              "data_type": "text"
+            },
+            {
+              "display_name": "Region Value (Code)",
+              "uid": "region_value",
+              "data_type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "display_name": "Cloud Providers",
+      "uid": "cloud_providers",
+      "data_type": "blocks",
+      "multiple": true,
+      "blocks": [
+        {
+          "title": "Provider Button",
+          "uid": "provider_button",
+          "schema": [
+            {
+              "display_name": "Provider Display Name",
+              "uid": "provider_display_name",
+              "data_type": "text"
+            },
+            {
+              "display_name": "Provider Code (Data-Cloud)",
+              "uid": "provider_code",
+              "data_type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "display_name": "Demo Request Link",
+      "uid": "demo_link",
+      "data_type": "group",
+      "schema": [
+        {
+          "display_name": "Link Text",
+          "uid": "link_text",
+          "data_type": "text"
+        },
+        {
+          "display_name": "Link URL",
+          "uid": "link_url",
+          "data_type": "text"
+        }
+      ]
+    }
+  ]
+}

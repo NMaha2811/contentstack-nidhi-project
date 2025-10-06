@@ -1,0 +1,144 @@
+{
+  "title": "Homepage",
+  "uid": "homepage",
+  "schema": [
+    {
+      "display_name": "Page Title",
+      "uid": "page_title",
+      "data_type": "text"
+    },
+    {
+      "display_name": "Announcement",
+      "uid": "announcement",
+      "data_type": "group",
+      "schema": [
+        {
+          "display_name": "Message",
+          "uid": "announcement_message",
+          "data_type": "text",
+          "field_metadata": {
+            "multiline": false
+          }
+        },
+        {
+          "display_name": "Link",
+          "uid": "announcement_link",
+          "data_type": "text"
+        }
+      ]
+    },
+    {
+      "display_name": "Hero",
+      "uid": "hero",
+      "data_type": "group",
+      "schema": [
+        {
+          "display_name": "Title",
+          "uid": "hero_title",
+          "data_type": "text"
+        },
+        {
+          "display_name": "Description",
+          "uid": "hero_description",
+          "data_type": "text",
+          "field_metadata": {
+            "multiline": true
+          }
+        },
+        {
+          "display_name": "Primary CTA",
+          "uid": "hero_primary_cta",
+          "data_type": "text"
+        },
+        {
+          "display_name": "Secondary CTA",
+          "uid": "hero_secondary_cta",
+          "data_type": "text"
+        }
+      ]
+    },
+    {
+      "display_name": "Features",
+      "uid": "features",
+      "data_type": "blocks",
+      "multiple": true,
+      "blocks": [
+        {
+          "title": "Feature",
+          "uid": "feature_block",
+          "schema": [
+            {
+              "display_name": "Heading",
+              "uid": "feature_heading",
+              "data_type": "text"
+            },
+            {
+              "display_name": "Description",
+              "uid": "feature_description",
+              "data_type": "text",
+              "field_metadata": {
+                "multiline": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "display_name": "ROI",
+      "uid": "roi",
+      "data_type": "blocks",
+      "multiple": true,
+      "blocks": [
+        {
+          "title": "KPI",
+          "uid": "kpi_block",
+          "schema": [
+            {
+              "display_name": "Metric",
+              "uid": "roi_metric",
+              "data_type": "text"
+            },
+            {
+              "display_name": "Description",
+              "uid": "roi_description",
+              "data_type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "display_name": "Stories",
+      "uid": "stories",
+      "data_type": "blocks",
+      "multiple": true,
+      "blocks": [
+        {
+          "title": "Story",
+          "uid": "story_block",
+          "schema": [
+            {
+              "display_name": "Image",
+              "uid": "story_image",
+              "data_type": "file"
+            },
+            {
+              "display_name": "Title",
+              "uid": "story_title",
+              "data_type": "text"
+            },
+            {
+              "display_name": "Summary",
+              "uid": "story_summary",
+              "data_type": "text",
+              "field_metadata": {
+                "multiline": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

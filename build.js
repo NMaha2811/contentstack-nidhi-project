@@ -1,8 +1,16 @@
 // build.js
 require('dotenv').config();
-const Contentstack = require('contentstack');
 const fs = require('fs-extra');
 const path = require('path');
+
+// FIX: Correctly import Contentstack SDK to avoid "Cannot call a class as a function" error
+const Contentstack = require('contentstack').default; 
+// If the above line fails, try: const Contentstack = require('contentstack');
+
+// --- Configuration ---
+const BUILD_DIR = 'dist';
+const HOMEPAGE_TEMPLATE = 'index.html';
+const LOGIN_TEMPLATE = 'Login.html'; 
 
 // 1. Initialize Contentstack Stack
 const Stack = Contentstack.Stack({
@@ -11,64 +19,71 @@ const Stack = Contentstack.Stack({
   environment: process.env.CONTENTSTACK_ENVIRONMENT
 });
 
-const BUILD_DIR = 'dist';
+// Helper function to render the ROI Blocks field (fixes the list generation issue)
+function renderKpis(kpisArray) {
+    // kpiBlock is an entry from the 'roi' array/block field
+    return kpisArray.map(kpiBlock => {
+        const metric = kpiBlock.roi_metric || '';
+        const description = kpiBlock.roi_description || '';
+        
+        // Ensure the ROI block UID is checked if multiple block types were used, 
+        // but based on your schema, it's just 'kpi_block'
+        if (kpiBlock.uid === 'kpi_block') {
+             return `<li><strong>${metric}</strong><span>${description}</span></li>`;
+        }
+        return ''; // Return empty string if block is unrecognized
+    }).join('');
+}
 
 async function fetchAndBuild() {
   try {
+    console.log('Starting build process...');
+    
+    // Clean up previous build and create new 'dist' directory
+    await fs.remove(BUILD_DIR);
     await fs.ensureDir(BUILD_DIR);
-
-    // 2. Fetch the Homepage Entry
+    
+    // --- FETCH DATA ---
     const response = await Stack.ContentType('homepage')
                                  .Entry(process.env.HOMEPAGE_ENTRY_UID)
                                  .fetch();
     const data = response.toJSON();
+    
+    console.log(`Successfully fetched homepage content entry: ${data.entry.uid}`);
 
-    // 3. Load the static HTML template
-    let htmlTemplate = fs.readFileSync('index.html', 'utf8');
+    // --- BUILD INDEX.HTML ---
+    let htmlTemplate = fs.readFileSync(HOMEPAGE_TEMPLATE, 'utf8');
 
-    // --- Content Replacement MAPPING ---
-    // (You will need to expand this based on the homepage schema)
+    // 2. Simple Content Mappings (Requires you to add the placeholders in index.html)
+    // ANNOUNCEMENT BAR MAPPING
+    htmlTemplate = htmlTemplate.replace('[[ANNOUNCEMENT_MESSAGE]]', data.entry.announcement.announcement_message);
+    // You would also need placeholders for the link text and URL here.
 
-    // a) Announcement Bar
-    htmlTemplate = htmlTemplate.replace(
-      'Visit us in London for DXC Europe 2025.', 
-      data.announcement.announcement_message // Assuming "announcement" is a group field
-    );
-    htmlTemplate = htmlTemplate.replace('Register now</a>', `${data.announcement.announcement_link}</a>`);
+    // HERO SECTION MAPPING
+    htmlTemplate = htmlTemplate.replace('[[HERO_TITLE]]', data.entry.hero.hero_title);
+    htmlTemplate = htmlTemplate.replace('[[HERO_DESCRIPTION]]', data.entry.hero.hero_description);
 
-    // b) Hero Section
-    htmlTemplate = htmlTemplate.replace(
-      'Personalized digital <br/>experiences in <em>real time</em>',
-      data.hero.hero_title
-    );
-    htmlTemplate = htmlTemplate.replace(
-      'Compose content once, deliver it to any personalized experience, everywhere — with performance, security, and scale baked in.',
-      data.hero.hero_description
-    );
+    // 3. Complex Block Field Mapping (ROI Section Fix)
+    // NOTE: In Contentstack API responses, the content of a Blocks field is nested under its UID property.
+    const kpisHTML = renderKpis(data.entry.roi);
+    htmlTemplate = htmlTemplate.replace('[[KPI_LIST_PLACEHOLDER]]', kpisHTML);
 
-    // c) Build Dynamic Features (Blocks field)
-    // This is complex and requires looping, for a simple start, we skip blocks or map a fixed number
-    // For example, mapping only the ROI KPIs as a list:
-    const kpisHTML = data.roi.map(kpiBlock => 
-      `<li><strong>${kpiBlock.roi_metric}</strong><span>${kpiBlock.roi_description}</span></li>`
-    ).join('');
-
-    // Find the ROI list placeholder in your index.html and replace it
-    // You would need to temporarily hardcode a known value in index.html to serve as a placeholder
-    // e.g. <ul class="kpis">[[KPI_LIST_PLACEHOLDER]]</ul>
-    // htmlTemplate = htmlTemplate.replace('[[KPI_LIST_PLACEHOLDER]]', kpisHTML);
-
-    // 4. Save the final file to the build directory
-    fs.writeFileSync(path.join(BUILD_DIR, 'index.html'), htmlTemplate);
-
-    // Copy static assets
+    // 4. Save the generated HTML
+    fs.writeFileSync(path.join(BUILD_DIR, HOMEPAGE_TEMPLATE), htmlTemplate);
+    
+    // --- COPY STATIC ASSETS ---
+    // Copy Login page and assets as they may not be fully dynamic yet
     await fs.copy('assets', path.join(BUILD_DIR, 'assets'));
-    await fs.copy('Login.html', path.join(BUILD_DIR, 'Login.html'));
+    await fs.copy(LOGIN_TEMPLATE, path.join(BUILD_DIR, LOGIN_TEMPLATE));
 
     console.log(`✅ Build successful! Files saved to ${BUILD_DIR}/`);
 
   } catch (error) {
-    console.error('❌ Build failed:', error);
+    console.error('❌ Build failed! Details below:');
+    if (error.status) {
+        console.error(`Contentstack API Error Status: ${error.status}`);
+    }
+    console.error(`Error message: ${error.message}`);
   }
 }
 
